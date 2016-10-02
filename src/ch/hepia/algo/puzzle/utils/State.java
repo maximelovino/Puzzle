@@ -6,13 +6,15 @@ public class State {
 	private String state;
 	private int n;
 	private int indexOfEmpty;
+	private int cost;
 
-	public State (String state, int n) {
+	public State (String state, int n, int cost) {
 		if (state.length()!= Math.pow(n,2))
 			throw new IllegalArgumentException("invalid state, size not compatible");
 
 		this.state = state;
 		this.n = n;
+		this.cost = cost;
 		this.indexOfEmpty = this.state.indexOf('0');
 	}
 
@@ -80,7 +82,7 @@ public class State {
 			newString = s1+'0'+s2+toSwapWith+s3;
 		}
 
-		return new State(newString,this.n);
+		return new State(newString,this.n, this.cost+1);
 	}
 
 	public String getState () {
@@ -89,6 +91,10 @@ public class State {
 
 	public int getN () {
 		return n;
+	}
+
+	public int getCost () {
+		return cost;
 	}
 
 	public int getIndexOfEmpty () {
