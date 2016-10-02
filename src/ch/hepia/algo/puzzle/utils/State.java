@@ -1,4 +1,4 @@
-package ch.hepia.algo.puzzle;
+package ch.hepia.algo.puzzle.utils;
 
 import java.util.ArrayList;
 
@@ -98,5 +98,22 @@ public class State {
 	@Override
 	public int hashCode () {
 		return this.state.hashCode();
+	}
+
+	@Override
+	public String toString () {
+		String str = "";
+
+		for (int i = 0; i < this.state.length(); i++) {
+			if (i % n == 0 && i != 0)
+				str += "\n";
+
+			str = this.state.charAt(i) == '0' ? str + "-" : str + this.state.charAt(i);
+
+			if (i != this.state.length()-1)
+				str += "\t";
+		}
+
+		return str;
 	}
 }
