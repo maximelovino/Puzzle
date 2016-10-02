@@ -67,6 +67,11 @@ public class State {
 		return swapEmptyWith(indexOfEmpty+n);
 	}
 
+	@Override
+	public boolean equals (Object obj) {
+		return this.hashCode() == obj.hashCode();
+	}
+
 	private State swapEmptyWith(int newIndex){
 		char toSwapWith = this.state.charAt(newIndex);
 
