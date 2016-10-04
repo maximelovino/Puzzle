@@ -127,4 +127,15 @@ public class State {
 
 		return str;
 	}
+
+	public static State getGoalState (int n){
+		String str = "";
+
+		for (int i = 0; i < Math.pow(n,2)-1; i++) {
+			str += String.valueOf(i+1);
+		}
+		str += '0';
+
+		return new State(str,n,0);
+	}
 }
