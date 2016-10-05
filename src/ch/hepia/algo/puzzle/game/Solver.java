@@ -22,15 +22,50 @@ public class Solver {
 			System.out.println("<Goal State>: Same as <Initial State> but you can use GOAL to set the goal state as the logical goal state for that size");
 			return;
 		}
-		/*
-		String st = "820347516";
-		int size = 3;
-		State initialState = new State(st,size,0,null);
-		*/
 
-		State initialState = State.getRandomState(3);
+		State initialState;
+		State goalState;
+		State finishedState = null;
+		int size;
 
-		State finishedState = blindSolve(initialState,3,false);
+		switch (args[1]){
+			case "RANDOM":
+				size = Integer.valueOf(args[2]);
+				initialState = State.getRandomState(size);
+				break;
+			default:
+				size = (int)Math.sqrt(args[1].length());
+				initialState = new State(args[1],size,0,null);
+				break;
+		}
+
+
+		switch (args[3]){
+			case "RANDOM":
+				goalState = State.getRandomState(size);
+				break;
+			case "GOAL":
+				goalState = State.getGoalState(size);
+				break;
+			default:
+				goalState = new State(args[3],size,0,null);
+				break;
+		}
+
+		switch (args[0]){
+			case "blind":
+				finishedState = blindSolve(initialState,size,false);
+				break;
+			case "cachedBlind":
+				finishedState = blindSolve(initialState,size,true);
+				break;
+			case "heuristics":
+				break;
+			default:
+				throw new IllegalArgumentException("Your type of search doesn't exist");
+		}
+
+
 		displayFullPathOfResult(finishedState);
 
 
@@ -91,7 +126,5 @@ public class Solver {
 
 		System.out.println("Cost of path: "+result.getCost());
 	}
-
-
 
 }
