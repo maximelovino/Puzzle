@@ -2,7 +2,9 @@ package ch.hepia.algo.puzzle.game;
 
 import ch.hepia.algo.puzzle.utils.State;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Stack;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Solver {
@@ -20,26 +22,18 @@ public class Solver {
 			System.out.println("<Goal State>: Same as <Initial State> but you can use GOAL to set the goal state as the logical goal state for that size");
 			return;
 		}
+		/*
+		String st = "820347516";
+		int size = 3;
+		State initialState = new State(st,size,0,null);
+		*/
+
+		State initialState = State.getRandomState(3);
+
+		State finishedState = blindSolve(initialState,3,false);
+		displayFullPathOfResult(finishedState);
 
 
-		State st = State.getRandomState(3);
-		System.out.println(st);
-
-//		String st = "820347516";
-//		int size = 3;
-//		State initialState = new State(st,size,0,null);
-//		System.out.println("initial state");
-//		System.out.println(initialState);
-//
-//		State finishedState = blindSolve(initialState,size,false);
-//
-//		System.out.println();
-//		if (finishedState!=null) {
-//			System.out.println(finishedState);
-//			System.out.println("Cost "+finishedState.getCost());
-//		}else{
-//			System.out.println("no solution was found");
-//		}
 
 	}
 
@@ -72,6 +66,30 @@ public class Solver {
 		}
 
 		return null;
+	}
+
+	public static void displayFullPathOfResult(State result){
+
+		if (result == null){
+			System.out.println("No path was found");
+			return;
+		}
+
+		Stack<State> path = new Stack<>();
+		State temp = result;
+
+		while (temp!=null){
+			path.push(temp);
+			temp = temp.getParentState();
+		}
+
+		while (!path.isEmpty()){
+			System.out.println();
+			System.out.println(path.pop());
+			System.out.println();
+		}
+
+		System.out.println("Cost of path: "+result.getCost());
 	}
 
 
