@@ -54,10 +54,10 @@ public class Solver {
 
 		switch (args[0]){
 			case "blind":
-				finishedState = blindSolve(initialState,size,false);
+				finishedState = blindSolve(initialState,goalState,size,false);
 				break;
 			case "cachedBlind":
-				finishedState = blindSolve(initialState,size,true);
+				finishedState = blindSolve(initialState,goalState,size,true);
 				break;
 			case "heuristics":
 				break;
@@ -73,8 +73,7 @@ public class Solver {
 	}
 
 
-	private static State blindSolve(State initialState, int size, boolean optimize){
-		State goalState = State.getGoalState(size);
+	private static State blindSolve(State initialState, State goalState, int size, boolean optimize){
 
 //		if (initialState.equals(goalState))
 //			return initialState;

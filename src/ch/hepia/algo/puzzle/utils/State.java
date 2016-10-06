@@ -1,8 +1,6 @@
 package ch.hepia.algo.puzzle.utils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -11,10 +9,10 @@ import java.util.Random;
  * State is represented as a string, cost is the number of moves to get to the state
  */
 public class State {
-	private String state;
+	private int[][] state;
 	private int n;
-	private int indexOfEmpty;
 	private int cost;
+	private Position indexOfEmpty;
 	private State parentState;
 
 	//TODO Problem with 4x4 with State class, number > 9 take two digits, fucks up everything
@@ -27,16 +25,45 @@ public class State {
 	 * @param n     The size of the square (nxn)
 	 * @param cost  The number of moves to get to the state
 	 */
-	public State (String state, int n, int cost, State parentState) {
-		if (state.length() != Math.pow(n, 2))
+	public State (int[][] state, int n, int cost, State parentState) {
+		if (state.length != n || state[0].length != n)
 			throw new IllegalArgumentException("invalid state, size not compatible");
 
 		this.state = state;
 		this.n = n;
 		this.cost = cost;
-		this.indexOfEmpty = this.state.indexOf('0');
+		this.indexOfEmpty = findEmpty(state);
 		this.parentState = parentState;
 	}
+
+	public State (String state, int n, int cost, State parentState){
+		if (state.length() > Math.pow(n,2))
+			throw new IllegalArgumentException("invalid state, size not compatible");
+
+		int[][] tab = new int[n][n];
+
+		for (int i = 0; i < state.length(); i++) {
+			tab[i / n][i % n] = Integer.valueOf(state.charAt(i));
+		}
+
+		this.state = tab;
+		this.n = n;
+		this.cost = cost;
+		this.indexOfEmpty = findEmpty(tab);
+		this.parentState = parentState;
+	}
+
+	private static Position findEmpty (int[][] tab) {
+		for (int i = 0; i < tab.length; i++) {
+			for (int j = 0; j < tab[i].length; j++) {
+				if (tab[i][j] == 0) {
+					return new Position(i, j);
+				}
+			}
+		}
+		return null;
+	}
+
 
 	public ArrayList<State> successors () {
 		ArrayList<State> successors = new ArrayList<>();
@@ -60,31 +87,31 @@ public class State {
 	}
 
 	private State moveLeft () {
-		if (this.indexOfEmpty % n == 0)
+		if (this.indexOfEmpty.getJ() == 0)
 			return null;
 
-		return swapEmptyWith(indexOfEmpty - 1);
+		return swapEmptyWith(new Position(this.indexOfEmpty.getI(), this.indexOfEmpty.getJ() - 1));
 	}
 
 	private State moveRight () {
-		if (this.indexOfEmpty % n == n - 1)
+		if (this.indexOfEmpty.getJ() == n - 1)
 			return null;
 
-		return swapEmptyWith(indexOfEmpty + 1);
+		return swapEmptyWith(new Position(this.indexOfEmpty.getI(), this.indexOfEmpty.getJ() + 1));
 	}
 
 	private State moveUp () {
-		if (this.indexOfEmpty - n < 0)
+		if (this.indexOfEmpty.getI() == 0)
 			return null;
 
-		return swapEmptyWith(indexOfEmpty - n);
+		return swapEmptyWith(new Position(this.indexOfEmpty.getI() - 1, this.indexOfEmpty.getJ()));
 	}
 
 	private State moveDown () {
-		if (this.indexOfEmpty + n > this.state.length() - 1)
+		if (this.indexOfEmpty.getI() == n - 1)
 			return null;
 
-		return swapEmptyWith(indexOfEmpty + n);
+		return swapEmptyWith(new Position(this.indexOfEmpty.getI() + 1, this.indexOfEmpty.getJ()));
 	}
 
 	@Override
@@ -92,25 +119,16 @@ public class State {
 		return this.hashCode() == obj.hashCode();
 	}
 
-	private State swapEmptyWith (int newIndex) {
-		char toSwapWith = this.state.charAt(newIndex);
+	private State swapEmptyWith (Position newIndex) {
+		int[][] newState = this.state.clone();
 
-		String s1 = this.state.substring(0, Math.min(newIndex, this.indexOfEmpty));
-		String s2 = this.state.substring(Math.min(newIndex, this.indexOfEmpty) + 1, Math.max(newIndex, this.indexOfEmpty));
-		String s3 = this.state.substring(Math.max(newIndex, this.indexOfEmpty) + 1);
+		newState[this.indexOfEmpty.getI()][this.indexOfEmpty.getJ()] = newState[newIndex.getI()][newIndex.getJ()];
+		newState[newIndex.getI()][newIndex.getJ()] = 0;
 
-		String newString;
-
-		if (this.indexOfEmpty < newIndex) {
-			newString = s1 + toSwapWith + s2 + '0' + s3;
-		} else {
-			newString = s1 + '0' + s2 + toSwapWith + s3;
-		}
-
-		return new State(newString, this.n, this.cost + 1, this);
+		return new State(newState, this.n, this.cost + 1, this);
 	}
 
-	public String getState () {
+	public int[][] getState () {
 		return state;
 	}
 
@@ -122,27 +140,33 @@ public class State {
 		return cost;
 	}
 
-	public int getIndexOfEmpty () {
-		return indexOfEmpty;
-	}
-
 	@Override
 	public int hashCode () {
-		return this.state.hashCode();
+		String str ="";
+		for (int i = 0; i < this.state.length; i++) {
+			for (int j = 0; j < this.state[i].length; j++) {
+				str += String.valueOf(this.state[i][j]);
+			}
+		}
+		return str.hashCode();
 	}
 
 	@Override
 	public String toString () {
 		String str = "";
 
-		for (int i = 0; i < this.state.length(); i++) {
-			if (i % n == 0 && i != 0)
-				str += "\n";
+		for (int i = 0; i < this.state.length; i++) {
+			for (int j = 0; j < this.state[i].length; j++) {
+				if (this.state[i][j] == 0)
+					str += "-";
+				else
+					str += this.state[i][j];
 
-			str = this.state.charAt(i) == '0' ? str + "-" : str + this.state.charAt(i);
+				if (j != n - 1)
+					str += "\t";
 
-			if (i != this.state.length() - 1)
-				str += "\t";
+			}
+			str += "\n";
 		}
 
 		return str;
@@ -153,18 +177,18 @@ public class State {
 	}
 
 	public static State getGoalState (int n) {
-		String str = "";
+		int[][] goal = new int[n][n];
 
 		for (int i = 0; i < Math.pow(n, 2) - 1; i++) {
-			str += String.valueOf(i + 1);
+			goal[i / n][i % n] = i + 1;
 		}
-		str += '0';
+		goal[n - 1][n - 1] = 0;
 
-		return new State(str, n, 0, null);
+		return new State(goal, n, 0, null);
 	}
 
 	public static State getRandomState (int n) {
-		String str = "";
+		int[][] newState = new int[n][n];
 		Random rand = new Random();
 		ArrayList<Integer> values = new ArrayList<>();
 
@@ -172,12 +196,15 @@ public class State {
 			values.add(i);
 		}
 
-		for (int i = 0; i < Math.pow(n, 2); i++) {
-			int index = rand.nextInt(values.size());
-			int temp = values.get(index);
-			values.remove(index);
-			str += String.valueOf(temp);
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				int index = rand.nextInt(values.size());
+				int temp = values.get(index);
+				values.remove(index);
+				newState[i][j] = temp;
+			}
 		}
-		return new State(str, n, 0, null);
+
+		return new State(newState, n, 0, null);
 	}
 }
