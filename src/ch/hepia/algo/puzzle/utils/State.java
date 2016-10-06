@@ -17,6 +17,9 @@ public class State {
 	private int cost;
 	private State parentState;
 
+	//TODO Problem with 4x4 with State class, number > 9 take two digits, fucks up everything
+
+
 	/**
 	 * Default constructor for State
 	 *

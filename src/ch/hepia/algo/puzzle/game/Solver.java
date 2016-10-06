@@ -73,7 +73,7 @@ public class Solver {
 	}
 
 
-	public static State blindSolve(State initialState, int size, boolean optimize){
+	private static State blindSolve(State initialState, int size, boolean optimize){
 		State goalState = State.getGoalState(size);
 
 //		if (initialState.equals(goalState))
@@ -103,7 +103,7 @@ public class Solver {
 		return null;
 	}
 
-	public static void displayFullPathOfResult(State result){
+	private static void displayFullPathOfResult(State result){
 
 		if (result == null){
 			System.out.println("No path was found");
@@ -125,6 +125,10 @@ public class Solver {
 		}
 
 		System.out.println("Cost of path: "+result.getCost());
+	}
+
+	private static State heuristicsSolve(State initialState, int size){
+		return null;
 	}
 
 }
