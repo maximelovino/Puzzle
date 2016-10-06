@@ -43,7 +43,7 @@ public class State {
 		int[][] tab = new int[n][n];
 
 		for (int i = 0; i < state.length(); i++) {
-			tab[i / n][i % n] = Integer.valueOf(state.charAt(i));
+			tab[i / n][i % n] = Integer.valueOf(state.substring(i,i+1));
 		}
 
 		this.state = tab;
@@ -120,7 +120,13 @@ public class State {
 	}
 
 	private State swapEmptyWith (Position newIndex) {
-		int[][] newState = this.state.clone();
+		int[][] newState = new int[n][n];
+
+		for (int i = 0; i < this.state.length; i++) {
+			for (int j = 0; j < this.state[i].length; j++) {
+				newState[i][j] = this.state[i][j];
+			}
+		}
 
 		newState[this.indexOfEmpty.getI()][this.indexOfEmpty.getJ()] = newState[newIndex.getI()][newIndex.getJ()];
 		newState[newIndex.getI()][newIndex.getJ()] = 0;
