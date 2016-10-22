@@ -215,4 +215,45 @@ public class State {
 
 		return new State(newState, n, 0, null);
 	}
+
+	public int getManhattanDistance(){
+		int distance = 0;
+
+		for (int i = 0; i < this.state.length; i++) {
+			for (int j = 0; j < this.state[i].length; j++) {
+				Position goalPos = getPositionInGoalState(state[i][j],this.n);
+				distance += Math.abs(i-goalPos.getI())+Math.abs(j-goalPos.getJ());
+			}
+		}
+		return distance;
+	}
+
+	/**
+	 * Heuristic that represents the number of tiles misplaced
+	 *
+	 * @return	The number of tiles that are not in the correct position
+	 */
+	public int getMisplacedTiles(){
+		int value = 0;
+
+		for (int i = 0; i < this.state.length; i++) {
+			for (int j = 0; j < this.state[i].length; j++) {
+				Position goalPos = getPositionInGoalState(state[i][j],this.n);
+				if (goalPos.getI() != i || goalPos.getJ() != j){
+					value ++;
+				}
+			}
+		}
+		return value;
+	}
+
+	private Position getPositionInGoalState(int number, int size){
+		if (number == 0){
+			return new Position(size-1,size-1);
+		}else{
+			int i = (number - 1) / size;
+			int j = (number - 1) % size;
+			return new Position(i,j);
+		}
+	}
 }
