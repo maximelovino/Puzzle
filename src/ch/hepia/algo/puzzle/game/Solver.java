@@ -8,6 +8,7 @@ import java.util.Stack;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Solver {
+	private static final int MAX_SIZE_QUEUE = 1000000;
 
 	public static void main (String[] args) {
 		if (args.length < 3){
@@ -17,9 +18,11 @@ public class Solver {
 			System.out.print("\t");
 			System.out.println("<Search type>: blind, cachedBlind, heuristics");
 			System.out.print("\t");
-			System.out.println("<Initial State>: Write the cases from top to bottom, left to right, first one top left, last one bottom right, 0 for the empty, or use 'RANDOM n' where n is the size of nxn puzzle");
+			System.out.println("<Initial State>: Write the cases from top to bottom, left to right, first one top left, " +
+					"last one bottom right, 0 for the empty, separated by '-' or use 'RANDOM n' where n is the size of nxn puzzle");
 			System.out.print("\t");
-			System.out.println("<Goal State>: Same as <Initial State> but you can use GOAL to set the goal state as the logical goal state for that size");
+			System.out.println("<Goal State>: Same as <Initial State> but you can use GOAL " +
+					"to set the goal state as the logical goal state for that size");
 			return;
 		}
 
@@ -65,8 +68,12 @@ public class Solver {
 				throw new IllegalArgumentException("Your type of search doesn't exist");
 		}
 
-
-		displayFullPathOfResult(finishedState);
+		if (size > 3 && finishedState!=goalState){
+			System.out.println("we couldn't do better than this");
+			System.out.println(finishedState);
+		}else{
+			displayFullPathOfResult(finishedState);
+		}
 
 
 
@@ -74,9 +81,6 @@ public class Solver {
 
 
 	private static State blindSolve(State initialState, State goalState, int size, boolean optimize){
-
-//		if (initialState.equals(goalState))
-//			return initialState;
 
 		LinkedBlockingQueue<State> queue = new LinkedBlockingQueue<>();
 
@@ -89,8 +93,20 @@ public class Solver {
 		while (!queue.isEmpty()){
 			currentState = queue.poll();
 
-			if (!visited.contains(currentState)){
-				visited.add(currentState);
+			//TODO check if we do like that
+			if (size > 3 && queue.size()> MAX_SIZE_QUEUE) {
+				return currentState;
+			}
+
+			if (optimize) {
+				if (!visited.contains(currentState)){
+					visited.add(currentState);
+					if (currentState.equals(goalState))
+						return currentState;
+					else
+						queue.addAll(currentState.successors());
+				}
+			}else{
 				if (currentState.equals(goalState))
 					return currentState;
 				else

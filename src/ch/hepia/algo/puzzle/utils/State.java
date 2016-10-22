@@ -37,13 +37,15 @@ public class State {
 	}
 
 	public State (String state, int n, int cost, State parentState){
-		if (state.length() > Math.pow(n,2))
-			throw new IllegalArgumentException("invalid state, size not compatible");
-
 		int[][] tab = new int[n][n];
 
-		for (int i = 0; i < state.length(); i++) {
-			tab[i / n][i % n] = Integer.valueOf(state.substring(i,i+1));
+		String[] oneDimArray = state.split("-");
+
+		if (oneDimArray.length != Math.pow(n,2))
+			throw new IllegalArgumentException("invalid state, size not compatible");
+
+		for (int i = 0; i < oneDimArray.length; i++) {
+			tab[i / n][i % n] = Integer.valueOf(oneDimArray[i]);
 		}
 
 		this.state = tab;
