@@ -16,7 +16,7 @@ public class Solver {
 			System.out.println("<Search type> <Initial State> <Goal State>");
 			System.out.println();
 			System.out.print("\t");
-			System.out.println("<Search type>: blind, cachedBlind, heuristics");
+			System.out.println("<Search type>: blind, cachedBlind, manhattan, misplaced (last two are heuristics)");
 			System.out.print("\t");
 			System.out.println("<Initial State>: Write the cases from top to bottom, left to right, first one top left, " +
 					"last one bottom right, 0 for the empty, separated by '-' or use 'RANDOM n' where n is the size of nxn puzzle");
@@ -62,13 +62,17 @@ public class Solver {
 			case "cachedBlind":
 				finishedState = blindSolve(initialState,goalState,size,true);
 				break;
-			case "heuristics":
+			case "manhattan":
+				finishedState = heuristicsSolve(initialState,goalState,size,true);
+				break;
+			case "misplaced":
+				finishedState = heuristicsSolve(initialState,goalState,size,false);
 				break;
 			default:
 				throw new IllegalArgumentException("Your type of search doesn't exist");
 		}
 
-		if (size > 3 && finishedState!=goalState){
+		if (finishedState!=goalState){
 			System.out.println("we couldn't do better than this");
 			System.out.println(finishedState);
 		}else{
@@ -142,8 +146,37 @@ public class Solver {
 		System.out.println("Cost of path: "+result.getCost());
 	}
 
-	private static State heuristicsSolve(State initialState, int size){
-		return null;
-	}
+	private static State heuristicsSolve(State initialState, State goalState, int size, boolean manhattan){
 
+		State currentState;
+
+		HashSet<State> visited = new HashSet<>();
+
+		currentState = initialState;
+
+		boolean blocked = false;
+
+		while(currentState != goalState && !blocked){
+			int bestHeuristic = Integer.MAX_VALUE;
+			int bestIndex = -1;
+			ArrayList<State> successors = currentState.successors();
+
+			for (int i = 0; i < successors.size(); i++) {
+				visited.add(currentState);
+				int temp = manhattan ? successors.get(i).getManhattanDistance() : successors.get(i).getMisplacedTiles();
+				
+				if (temp < bestHeuristic && !(visited.contains(successors.get(i)))){
+					bestIndex = i;
+					bestHeuristic = temp;
+				}
+			}
+			if (bestIndex != -1){
+				currentState = successors.get(bestIndex);
+			}else{
+				blocked = true;
+			}
+		}
+
+		return currentState;
+	}
 }

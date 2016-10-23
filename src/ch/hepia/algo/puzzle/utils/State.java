@@ -216,6 +216,11 @@ public class State {
 		return new State(newState, n, 0, null);
 	}
 
+	/**
+	 * Heuristic that represents the manhattant distance to the solution
+	 *
+	 * @return	The manhattan distance to the solution
+	 */
 	public int getManhattanDistance(){
 		int distance = 0;
 
@@ -247,7 +252,14 @@ public class State {
 		return value;
 	}
 
+	/**
+	 *
+	 * @param number	The number we want the final position for
+	 * @param size	The size of the side of the puzzle
+	 * @return	The position of the tile in the goalState
+	 */
 	private Position getPositionInGoalState(int number, int size){
+		//TODO check if we should check according to the asked goalState or only the "perfect" state
 		if (number == 0){
 			return new Position(size-1,size-1);
 		}else{
