@@ -40,7 +40,6 @@ public class State {
 		int[][] tab = new int[n][n];
 
 		String[] oneDimArray = state.split("-");
-
 		if (oneDimArray.length != Math.pow(n,2))
 			throw new IllegalArgumentException("invalid state, size not compatible");
 

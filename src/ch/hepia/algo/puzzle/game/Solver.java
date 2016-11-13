@@ -4,6 +4,7 @@ import ch.hepia.algo.puzzle.utils.State;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Stack;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -37,7 +38,7 @@ public class Solver {
 				initialState = State.getRandomState(size);
 				break;
 			default:
-				size = (int)Math.sqrt(args[1].length());
+				size = Integer.valueOf(args[2]);
 				initialState = new State(args[1],size,0,null);
 				break;
 		}
@@ -71,12 +72,17 @@ public class Solver {
 			default:
 				throw new IllegalArgumentException("Your type of search doesn't exist");
 		}
+		if (finishedState != null) {
 
-		if (finishedState!=goalState){
-			System.out.println("we couldn't do better than this");
-			System.out.println(finishedState);
+			if (!finishedState.equals(goalState)) {
+				System.out.println("we couldn't do better than this");
+				System.out.println(finishedState);
+			} else {
+				displayFullPathOfResult(finishedState);
+			}
 		}else{
-			displayFullPathOfResult(finishedState);
+			System.out.println(initialState);
+			System.out.println("no solution was found");
 		}
 
 
@@ -139,7 +145,10 @@ public class Solver {
 
 		while (!path.isEmpty()){
 			System.out.println();
-			System.out.println(path.pop());
+			State tempState = path.pop();
+			System.out.println(tempState);
+			System.out.println();
+			System.out.println(tempState.getManhattanDistance());
 			System.out.println();
 		}
 
@@ -147,34 +156,29 @@ public class Solver {
 	}
 
 	private static State heuristicsSolve(State initialState, State goalState, int size, boolean manhattan){
+		PriorityQueue<State> priority = new PriorityQueue<>((o1, o2) -> {
+			Integer heuristic1 = manhattan ? o1.getManhattanDistance() : o1.getMisplacedTiles();
+			Integer heuristic2 = manhattan ? o2.getManhattanDistance() : o2.getMisplacedTiles();
+			return heuristic1.compareTo(heuristic2);
+		});
 
-		State currentState;
+		State currentState = null;
 
 		HashSet<State> visited = new HashSet<>();
 
-		currentState = initialState;
+		priority.add(initialState);
 
-		boolean blocked = false;
+		while (!priority.isEmpty()) {
+			currentState = priority.poll();
+			if (currentState.equals(goalState))
+				return currentState;
+			ArrayList<State> succ = currentState.successors();
 
-		while(currentState != goalState && !blocked){
-			int bestHeuristic = Integer.MAX_VALUE;
-			int bestIndex = -1;
-			ArrayList<State> successors = currentState.successors();
-
-			for (int i = 0; i < successors.size(); i++) {
-				visited.add(currentState);
-				int temp = manhattan ? successors.get(i).getManhattanDistance() : successors.get(i).getMisplacedTiles();
-				
-				if (temp < bestHeuristic && !(visited.contains(successors.get(i)))){
-					bestIndex = i;
-					bestHeuristic = temp;
-				}
+			for (State successor : succ) {
+				if (!visited.contains(successor) && !priority.contains(successor))
+					priority.add(successor);
 			}
-			if (bestIndex != -1){
-				currentState = successors.get(bestIndex);
-			}else{
-				blocked = true;
-			}
+			visited.add(currentState);
 		}
 
 		return currentState;
