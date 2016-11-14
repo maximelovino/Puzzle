@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Solver {
 	private static final int MAX_SIZE_QUEUE = 1000000;
+	private static int count = 0;
 
 	public static void main (String[] args) {
 		if (args.length < 3){
@@ -84,6 +85,7 @@ public class Solver {
 			System.out.println(initialState);
 			System.out.println("no solution was found");
 		}
+		System.out.println("We went through " + count + " states");
 
 
 
@@ -102,6 +104,7 @@ public class Solver {
 
 		while (!queue.isEmpty()){
 			currentState = queue.poll();
+			count++;
 
 			//TODO check if we do like that
 			if (size > 3 && queue.size()> MAX_SIZE_QUEUE) {
@@ -148,8 +151,6 @@ public class Solver {
 			State tempState = path.pop();
 			System.out.println(tempState);
 			System.out.println();
-			System.out.println(tempState.getManhattanDistance());
-			System.out.println();
 		}
 
 		System.out.println("Cost of path: "+result.getCost());
@@ -170,6 +171,7 @@ public class Solver {
 
 		while (!priority.isEmpty()) {
 			currentState = priority.poll();
+			count++;
 			if (currentState.equals(goalState))
 				return currentState;
 			ArrayList<State> succ = currentState.successors();
