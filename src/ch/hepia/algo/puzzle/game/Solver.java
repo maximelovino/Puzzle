@@ -56,6 +56,7 @@ public class Solver {
 				goalState = new State(args[3],size,0,null);
 				break;
 		}
+		initialState.setGoalState(goalState);
 
 		switch (args[0]){
 			case "blind":
@@ -106,7 +107,7 @@ public class Solver {
 			currentState = queue.poll();
 			count++;
 
-			//TODO check if we do like that
+
 			if (size > 3 && queue.size()> MAX_SIZE_QUEUE) {
 				return currentState;
 			}

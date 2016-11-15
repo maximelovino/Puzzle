@@ -5,7 +5,7 @@ import java.util.Random;
 
 /**
  * Class representing a state of the game
- * <p>
+ *
  * State is represented as a string, cost is the number of moves to get to the state
  */
 public class State {
@@ -14,17 +14,9 @@ public class State {
 	private int cost;
 	private Position indexOfEmpty;
 	private State parentState;
+	private State goalState;
 
-	//TODO Problem with 4x4 with State class, number > 9 take two digits, fucks up everything
 
-
-	/**
-	 * Default constructor for State
-	 *
-	 * @param state The state, as a string
-	 * @param n     The size of the square (nxn)
-	 * @param cost  The number of moves to get to the state
-	 */
 	public State (int[][] state, int n, int cost, State parentState) {
 		if (state.length != n || state[0].length != n)
 			throw new IllegalArgumentException("invalid state, size not compatible");
@@ -34,6 +26,7 @@ public class State {
 		this.cost = cost;
 		this.indexOfEmpty = findEmpty(state);
 		this.parentState = parentState;
+		this.goalState = null;
 	}
 
 	public State (String state, int n, int cost, State parentState){
@@ -52,6 +45,19 @@ public class State {
 		this.cost = cost;
 		this.indexOfEmpty = findEmpty(tab);
 		this.parentState = parentState;
+		this.goalState = null;
+	}
+
+	public State (int[][] state, int n, int cost, State parentState, State goalState) {
+		if (state.length != n || state[0].length != n)
+			throw new IllegalArgumentException("invalid state, size not compatible");
+
+		this.state = state;
+		this.n = n;
+		this.cost = cost;
+		this.indexOfEmpty = findEmpty(state);
+		this.parentState = parentState;
+		this.goalState = goalState;
 	}
 
 	private static Position findEmpty (int[][] tab) {
@@ -132,7 +138,7 @@ public class State {
 		newState[this.indexOfEmpty.getI()][this.indexOfEmpty.getJ()] = newState[newIndex.getI()][newIndex.getJ()];
 		newState[newIndex.getI()][newIndex.getJ()] = 0;
 
-		return new State(newState, this.n, this.cost + 1, this);
+		return new State(newState, this.n, this.cost + 1, this, goalState);
 	}
 
 	public int[][] getState () {
@@ -225,7 +231,7 @@ public class State {
 
 		for (int i = 0; i < this.state.length; i++) {
 			for (int j = 0; j < this.state[i].length; j++) {
-				Position goalPos = getPositionInGoalState(state[i][j],this.n);
+				Position goalPos = getPositionInGoalState(state[i][j]);
 				distance += Math.abs(i-goalPos.getI())+Math.abs(j-goalPos.getJ());
 			}
 		}
@@ -242,7 +248,7 @@ public class State {
 
 		for (int i = 0; i < this.state.length; i++) {
 			for (int j = 0; j < this.state[i].length; j++) {
-				Position goalPos = getPositionInGoalState(state[i][j],this.n);
+				Position goalPos = getPositionInGoalState(state[i][j]);
 				if (goalPos.getI() != i || goalPos.getJ() != j){
 					value ++;
 				}
@@ -251,20 +257,22 @@ public class State {
 		return value;
 	}
 
-	/**
-	 *
-	 * @param number	The number we want the final position for
-	 * @param size	The size of the side of the puzzle
-	 * @return	The position of the tile in the goalState
-	 */
-	private Position getPositionInGoalState(int number, int size){
-		//TODO check if we should check according to the asked goalState or only the "perfect" state
-		if (number == 0){
-			return new Position(size-1,size-1);
-		}else{
-			int i = (number - 1) / size;
-			int j = (number - 1) % size;
-			return new Position(i,j);
+
+	private Position getPositionInGoalState (int number) {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (goalState.getState()[i][j] == number)
+					return new Position(i, j);
+			}
 		}
+		return null;
+	}
+
+	public void setGoalState (State goalState) {
+		this.goalState = goalState;
+	}
+
+	public State getGoalState () {
+		return goalState;
 	}
 }
