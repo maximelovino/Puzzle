@@ -15,49 +15,68 @@ public class Solver {
 	public static void main (String[] args) {
 		if (args.length < 3){
 			System.out.println("Please use these programs with the following arguments");
-			System.out.println("<Search type> <Initial State> <Goal State>");
+			System.out.println("<Search type> <Initial State> <Size> <Goal State>");
 			System.out.println();
 			System.out.print("\t");
 			System.out.println("<Search type>: blind, cachedBlind, manhattan, misplaced (last two are heuristics)");
 			System.out.print("\t");
 			System.out.println("<Initial State>: Write the cases from top to bottom, left to right, first one top left, " +
-					"last one bottom right, 0 for the empty, separated by '-' or use 'RANDOM n' where n is the size of nxn puzzle");
+					"last one bottom right, 0 for the empty, separated by '-' or use 'RANDOM'");
 			System.out.print("\t");
 			System.out.println("<Goal State>: Same as <Initial State> but you can use GOAL " +
-					"to set the goal state as the logical goal state for that size");
+					"to set the goal state as the perfect goal state for that size");
 			return;
 		}
 
-		State initialState;
-		State goalState;
+		State initialState = null;
+		State goalState = null;
 		State finishedState = null;
-		int size;
+		int size = 0;
+		try {
+			size = Integer.valueOf(args[2]);
+		} catch (NumberFormatException e) {
+			System.out.println("The size param was not valid");
+			e.printStackTrace();
+			System.exit(1);
+		}
 
+		// Switch for initial State, if it's random, we generate it, otherwise we read from input
 		switch (args[1]){
 			case "RANDOM":
-				size = Integer.valueOf(args[2]);
 				initialState = State.getRandomState(size);
 				break;
 			default:
-				size = Integer.valueOf(args[2]);
-				initialState = new State(args[1],size,0,null);
+				try {
+					initialState = new State(args[1], size, 0, null);
+				} catch (IllegalArgumentException e) {
+					System.out.println("The input for initialState was not conform to the size");
+					e.printStackTrace();
+					System.exit(1);
+				}
 				break;
 		}
 
-
+		// Switch for goal State
 		switch (args[3]){
 			case "RANDOM":
 				goalState = State.getRandomState(size);
 				break;
 			case "GOAL":
-				goalState = State.getGoalState(size);
+				goalState = State.getPerfectState(size);
 				break;
 			default:
-				goalState = new State(args[3],size,0,null);
+				try {
+					goalState = new State(args[3], size, 0, null);
+				} catch (IllegalArgumentException e) {
+					System.out.println("The input for initialState was not conform to the size");
+					e.printStackTrace();
+					System.exit(1);
+				}
 				break;
 		}
 		initialState.setGoalState(goalState);
 
+		// Switch for how to solve
 		switch (args[0]){
 			case "blind":
 				finishedState = blindSolve(initialState,goalState,size,false);
@@ -72,10 +91,11 @@ public class Solver {
 				finishedState = heuristicsSolve(initialState,goalState,size,false);
 				break;
 			default:
-				throw new IllegalArgumentException("Your type of search doesn't exist");
+				System.out.println("This type of search is invalid");
+				System.exit(1);
 		}
-		if (finishedState != null) {
 
+		if (finishedState != null) {
 			if (!finishedState.equals(goalState)) {
 				System.out.println("we couldn't do better than this");
 				System.out.println(finishedState);
@@ -93,6 +113,15 @@ public class Solver {
 	}
 
 
+	/**
+	 * Method that implements a blindSearch to solve
+	 *
+	 * @param initialState The initialstate of our puzzle
+	 * @param goalState    The state we want to achieve
+	 * @param size         The size of our puzzle
+	 * @param optimize     If we use a cache to store already visited states
+	 * @return The goalState created by the path we used, or null if there is no solution
+	 */
 	private static State blindSolve(State initialState, State goalState, int size, boolean optimize){
 
 		LinkedBlockingQueue<State> queue = new LinkedBlockingQueue<>();
@@ -132,7 +161,14 @@ public class Solver {
 		return null;
 	}
 
-	private static void displayFullPathOfResult(State result){
+	/**
+	 * Method to display the path of the result, from initialState to goalState
+	 *
+	 * @param result	The result state
+	 */
+	private static void displayFullPathOfResult (State result) {
+
+		//We stack from result to initialState using parentState and then we unstack and print
 
 		if (result == null){
 			System.out.println("No path was found");
@@ -154,9 +190,18 @@ public class Solver {
 			System.out.println();
 		}
 
-		System.out.println("Cost of path: "+result.getCost());
+		System.out.println("Cost of path: " + result.getCost());
 	}
 
+	/**
+	 * Heuristic search method to solve puzzle
+	 *
+	 * @param initialState    The initial state of our puzzle
+	 * @param goalState        The goal state of our puzzle
+	 * @param size            The size of the puzzle
+	 * @param manhattan        Boolean to tell if we use manhattan or misplaced tiles heuristics
+	 * @return The result state, obtained from the search
+	 */
 	private static State heuristicsSolve(State initialState, State goalState, int size, boolean manhattan){
 		PriorityQueue<State> priority = new PriorityQueue<>((o1, o2) -> {
 			Integer heuristic1 = manhattan ? o1.getManhattanDistance() : o1.getMisplacedTiles();
